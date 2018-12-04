@@ -31,6 +31,7 @@ export default class VueRouter {
   beforeHooks: Array<?NavigationGuard>;
   resolveHooks: Array<?NavigationGuard>;
   afterHooks: Array<?AfterNavigationHook>;
+  direction: string; //页面跳转方向
 
   constructor (options: RouterOptions = {}) {
     this.app = null
@@ -66,6 +67,7 @@ export default class VueRouter {
           assert(false, `invalid mode: ${mode}`)
         }
     }
+    this.direction = 'refresh' //默认是刷新，即页面刚打开
   }
 
   match (
@@ -86,7 +88,7 @@ export default class VueRouter {
       `not installed. Make sure to call \`Vue.use(VueRouter)\` ` +
       `before creating root instance.`
     )
-
+    
     this.apps.push(app)
 
     // main app already initialized.
@@ -106,6 +108,7 @@ export default class VueRouter {
       }
       history.transitionTo(
         history.getCurrentLocation(),
+        'refresh',
         setupHashListener,
         setupHashListener
       )
@@ -139,22 +142,31 @@ export default class VueRouter {
   }
 
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.history.push(location, onComplete, onAbort)
+    this.history.push(location, 'forward', onComplete, onAbort)
   }
 
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.history.replace(location, onComplete, onAbort)
+    this.history.replace(location, 'replace', onComplete, onAbort)
   }
 
   go (n: number) {
+    if (n > 0) {
+      this.direction = 'forward'
+    } else if (n < 0) {
+      this.direction = 'back'
+    } else {
+      this.direction = 'refresh'
+    }
     this.history.go(n)
   }
 
   back () {
+    this.direction = 'back'
     this.go(-1)
   }
 
   forward () {
+    this.direction = 'forward'
     this.go(1)
   }
 

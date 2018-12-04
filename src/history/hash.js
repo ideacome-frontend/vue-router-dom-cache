@@ -33,7 +33,7 @@ export class HashHistory extends History {
       if (!ensureSlash()) {
         return
       }
-      this.transitionTo(getHash(), route => {
+      this.transitionTo(getHash(), 'back', route => {
         if (supportsScroll) {
           handleScroll(this.router, route, current, true)
         }
@@ -44,18 +44,18 @@ export class HashHistory extends History {
     })
   }
 
-  push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+  push (location: RawLocation, direction?: String, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
-    this.transitionTo(location, route => {
+    this.transitionTo(location, direction, route => {
       pushHash(route.fullPath)
       handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
 
-  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+  replace (location: RawLocation, direction?: String, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
-    this.transitionTo(location, route => {
+    this.transitionTo(location, direction, route => {
       replaceHash(route.fullPath)
       handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
