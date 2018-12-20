@@ -1,5 +1,6 @@
 import { warn } from '../util/warn'
 import { extend } from '../util/misc'
+import { genKey } from '../util/push-state'
 
 export default {
   name: 'RouterViews',
@@ -21,8 +22,8 @@ export default {
     const route = parent.$route
     const router = parent.$router
     const cache = parent._routerViewCache || (parent._routerViewCache = {})
-    let vnodeCache = parent._vnodeCache || (parent._vnodeCache = [])
-    let currentVnode;
+    let vnodeCache = parent.$root['_vnodeCache'] || (parent.$root['_vnodeCache'] = [])
+    let currentVnode
     // determine current view depth, also check to see if the tree
     // has been toggled inactive but kept-alive.
     let depth = 0
@@ -40,7 +41,6 @@ export default {
 
     // render previous view if the tree is inactive and kept-alive
     if (inactive) {
-        console.log(cache[name])
         currentVnode = h(cache[name], data, children)
         //   return h(cache[name], data, children)
     } else {
@@ -88,58 +88,15 @@ export default {
         }
         currentVnode = h(component, data, children)
     }
-    if(router.direction!=='back') {
-        currentVnode['key'] = Date.now()
-    }
-    console.log(currentVnode)
+    currentVnode['key'] = genKey()
+   
     const direction = router.direction
-    //向前跳转需要将vnode push 入 vnodeCache并渲染，还需要将除当前组件外的vnode对象置为隐藏
-    if(router.direction==='forward'){
-        vnodeCache.push(currentVnode)
-    }
-    // redirect need to replace
-    else if(router.direction==='replace'){
-        vnodeCache.splice(vnodeCache.length - 1, 1, currentVnode)
-    }
-    // refresh
-    else if(router.direction==='refresh'){
-        vnodeCache.push(currentVnode)
-    }
-    //back need to pop 
-    else if(router.direction==='back'){
-        if(vnodeCache.length === 1){ //页面刷新之后回退
-            vnodeCache = [currentVnode];
-        }else{
-            const {isCached, index} = matchPage(vnodeCache, currentVnode.tag)
-            if(isCached) {
-                vnodeCache.splice(index + 1, vnodeCache.length - index - 1)
-            }
-        }
-    }
-    console.log(vnodeCache)
-    // const needShowVnodeCache = vnodeCache.length > 2 ? vnodeCache.slice(vnodeCache.length - 2) : vnodeCache
-    // let transitionName;
-    // if(vnodeCache.length>1){
-        // transitionName = 'router-slid'
-    // }else{
-    //     transitionName = 'fade'
-    // }
-
-    //处理dom的显示隐藏
-    if(vnodeCache.length > 2) {
-        for(let i = 0; i < vnodeCache.length - 2; i++) {
-            const staticClass = vnodeCache[i].data.staticClass;
-            if(staticClass && staticClass.indexOf('none') < 0) {
-                vnodeCache[i].data.staticClass = staticClass + ' none'
-            }
-        }
-    } else {
-        vnodeCache.forEach((vnode, index) => {
-            vnode.data.staticClass && vnode.data.staticClass.replace(/ none/, '')
-        }) 
-    }
-    return h('transition-group', { attrs: {tag: 'div', name: 'router-slid'} }, vnodeCache)
+    const transitionName = direction==='back' && vnodeCache.length == 1 ? 'router-fade' : 'router-slid'
+    setVnodeCache(direction, vnodeCache, currentVnode)
+    domCached(vnodeCache)
+    parent.$root['_vnodeCache'] = vnodeCache
     
+    return h('transition-group', { attrs: {tag: 'div', name: transitionName} }, vnodeCache) 
   }
 }
 function matchPage (vnodeCache, tag) {
@@ -174,4 +131,41 @@ function resolveProps (route, config) {
         )
       }
   }
+}
+function setVnodeCache (direction, vnodeCache, currentVnode) {
+    if(direction==='forward'){
+        vnodeCache.push(currentVnode)
+    }
+    else if(direction==='replace'){
+        vnodeCache.splice(vnodeCache.length - 1, 1, currentVnode)
+    }
+    else if(direction==='refresh'){
+        vnodeCache.length = 0
+        vnodeCache.push(currentVnode)
+    }
+    else if(direction==='back'){
+        if(vnodeCache.length === 1){ //页面刷新之后回退
+            vnodeCache.length = 0
+            vnodeCache.push(currentVnode)
+        }else{
+            const {isCached, index} = matchPage(vnodeCache, currentVnode.tag)
+            if(isCached) {
+                vnodeCache.splice(index + 1, vnodeCache.length - index - 1)
+            }
+        }
+    }
+}
+//处理dom的显示隐藏
+function domCached (vnodeCache) {
+    for(let i = 0; i < vnodeCache.length; i++) {
+        if(!vnodeCache[i].elm) continue;
+        const classList = vnodeCache[i].elm && vnodeCache[i].elm.classList || [];
+        if(vnodeCache.length > 2) {
+            if(i < vnodeCache.length - 2) {
+                classList.add('cached')
+            }
+        } else if(classList.contains('cached')){
+            classList.remove('cached')
+        }
+    }
 }

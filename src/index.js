@@ -7,7 +7,7 @@ import { inBrowser } from './util/dom'
 import { cleanPath } from './util/path'
 import { createMatcher } from './create-matcher'
 import { normalizeLocation } from './util/location'
-import { supportsPushState } from './util/push-state'
+import { supportsPushState, setRouterHistory } from './util/push-state'
 
 import { HashHistory } from './history/hash'
 import { HTML5History } from './history/html5'
@@ -104,6 +104,7 @@ export default class VueRouter {
       history.transitionTo(history.getCurrentLocation())
     } else if (history instanceof HashHistory) {
       const setupHashListener = () => {
+        setRouterHistory()
         history.setupListeners()
       }
       history.transitionTo(

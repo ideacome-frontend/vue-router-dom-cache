@@ -39,9 +39,9 @@ new Vue({
         <router-link tag="li" to="/bar">/bar</router-link>
         <li><router-link to="/é">/é</router-link></li>
       </ul>
-      <keep-alive>
-        <router-views class="view"></router-views>
-        </keep-alive>
+      <div class="views">
+        <router-views></router-views>
+      </div>
     </div>
   `
 }).$mount('#app')

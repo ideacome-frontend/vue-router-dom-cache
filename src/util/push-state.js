@@ -25,8 +25,24 @@ const Time = inBrowser && window.performance && window.performance.now
 
 let _key: string = genKey()
 
-function genKey (): string {
+export function genKey (): string {
   return Time.now().toFixed(3)
+}
+
+export function setRouterHistory (url?: string) {
+  //将key作为每个页面的唯一标示，用于在popstate监听事件里面判断页面的前进后退
+  let historyListString = sessionStorage.getItem('routerHistoryKeyList')
+  let list = historyListString && JSON.parse(historyListString) || []
+  //跳转到某个页面刷新不需要重新添加该页面的url到历史记录
+  let isNeedPush = !url && list.length && (window.location.href == list[list.length - 1].url)
+  if(!isNeedPush){
+    list.push({
+      key: _key, 
+      url: url ? url: window.location.href
+    })
+  }
+
+  sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list)) 
 }
 
 export function getStateKey () {
@@ -48,6 +64,7 @@ export function pushState (url?: string, replace?: boolean) {
     } else {
       _key = genKey()
       history.pushState({ key: _key }, '', url)
+      setRouterHistory(url)
     }
   } catch (e) {
     window.location[replace ? 'replace' : 'assign'](url)

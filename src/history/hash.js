@@ -28,12 +28,13 @@ export class HashHistory extends History {
       setupScroll()
     }
 
-    window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
+    window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', (e) => {
       const current = this.current
       if (!ensureSlash()) {
         return
       }
-      this.transitionTo(getHash(), 'back', route => {
+      const { direction } = judgeDirectionWhenClickBrowserBtn(e)
+      this.transitionTo(getHash(), direction, route => {
         if (supportsScroll) {
           handleScroll(this.router, route, current, true)
         }
@@ -125,5 +126,35 @@ function replaceHash (path) {
     replaceState(getUrl(path))
   } else {
     window.location.replace(getUrl(path))
+  }
+}
+
+function judgeDirectionWhenClickBrowserBtn (e:PopStateEvent) {
+  let historyListString = sessionStorage.getItem('routerHistoryKeyList')
+  let list = historyListString && JSON.parse(historyListString) || []
+  let key = e.state && e.state.key
+  let url = e.currentTarget.location.href
+  let direction = 'forward'
+  
+  if(list.length < 1) {
+    direction = 'refresh'
+  }
+  //直接修改地址栏url路径触发
+  for (let i = list.length - 1; i >= 0; i--) {
+    if(decodeURIComponent(list[i].url) === decodeURIComponent(url)) {
+      direction = 'back'
+      list = list.slice(0, i+1)
+      break
+    }
+  }
+  if(direction === 'forward'){
+    list.push({
+      key: key,
+      url: url
+    })
+  }
+  sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list))
+  return {
+    direction: direction
   }
 }
