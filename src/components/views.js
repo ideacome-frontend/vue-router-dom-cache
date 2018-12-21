@@ -158,11 +158,14 @@ function setVnodeCache (direction, vnodeCache, currentVnode) {
 //处理dom的显示隐藏
 function domCached (vnodeCache) {
     for(let i = 0; i < vnodeCache.length; i++) {
+        console.log(vnodeCache[i]);
         if(!vnodeCache[i].elm) continue;
         const classList = vnodeCache[i].elm && vnodeCache[i].elm.classList || [];
         if(vnodeCache.length > 2) {
             if(i < vnodeCache.length - 2) {
                 classList.add('cached')
+            } else {
+                classList.remove('cached')
             }
         } else if(classList.contains('cached')){
             classList.remove('cached')
