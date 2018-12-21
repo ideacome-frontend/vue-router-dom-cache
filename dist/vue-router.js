@@ -519,6 +519,8 @@ function domCached (vnodeCache) {
         if(vnodeCache.length > 2) {
             if(i < vnodeCache.length - 2) {
                 classList.add('cached');
+            } else {
+                classList.remove('cached');
             }
         } else if(classList.contains('cached')){
             classList.remove('cached');
