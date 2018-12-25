@@ -24,33 +24,32 @@ const Time = inBrowser && window.performance && window.performance.now
   : Date
 
 let _key: string = genKey()
+let _index: number = genIndex()
 
 export function genKey (): string {
   return Time.now().toFixed(3)
 }
 
-export function setRouterHistory (url?: string) {
-  //将key作为每个页面的唯一标示，用于在popstate监听事件里面判断页面的前进后退
-  let historyListString = sessionStorage.getItem('routerHistoryKeyList')
-  let list = historyListString && JSON.parse(historyListString) || []
-  //跳转到某个页面刷新不需要重新添加该页面的url到历史记录
-  let isNeedPush = !url && list.length && (window.location.href == list[list.length - 1].url)
-  if(!isNeedPush){
-    list.push({
-      key: _key, 
-      url: url ? url: window.location.href
-    })
-  }
-
-  sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list)) 
+function genIndex (): number {
+  const history = window.history
+  const index = history.state && history.state['index'] || 0
+  return index
 }
 
 export function getStateKey () {
   return _key
 }
 
-export function setStateKey (key: string) {
+export function setStateKey (key: number) {
   _key = key
+}
+
+export function getStateIndex () {
+  return _index
+}
+
+export function setStateIndex (index: number) {
+  _index = index
 }
 
 export function pushState (url?: string, replace?: boolean) {
@@ -60,11 +59,12 @@ export function pushState (url?: string, replace?: boolean) {
   const history = window.history
   try {
     if (replace) {
-      history.replaceState({ key: _key }, '', url)
+      history.replaceState({ key: _key, index: _index }, '', url)
     } else {
       _key = genKey()
-      history.pushState({ key: _key }, '', url)
-      setRouterHistory(url)
+      const index = _index + 1
+      history.pushState({ key: _key, index: index }, '', url)
+      setStateIndex(index)
     }
   } catch (e) {
     window.location[replace ? 'replace' : 'assign'](url)

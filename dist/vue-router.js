@@ -300,25 +300,16 @@ var Time = inBrowser && window.performance && window.performance.now
   : Date;
 
 var _key = genKey();
+var _index = genIndex();
 
 function genKey () {
   return Time.now().toFixed(3)
 }
 
-function setRouterHistory (url) {
-  //将key作为每个页面的唯一标示，用于在popstate监听事件里面判断页面的前进后退
-  var historyListString = sessionStorage.getItem('routerHistoryKeyList');
-  var list = historyListString && JSON.parse(historyListString) || [];
-  //跳转到某个页面刷新不需要重新添加该页面的url到历史记录
-  var isNeedPush = !url && list.length && (window.location.href == list[list.length - 1].url);
-  if(!isNeedPush){
-    list.push({
-      key: _key, 
-      url: url ? url: window.location.href
-    });
-  }
-
-  sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list)); 
+function genIndex () {
+  var history = window.history;
+  var index = history.state && history.state['index'] || 0;
+  return index
 }
 
 function getStateKey () {
@@ -329,6 +320,14 @@ function setStateKey (key) {
   _key = key;
 }
 
+function getStateIndex () {
+  return _index
+}
+
+function setStateIndex (index) {
+  _index = index;
+}
+
 function pushState (url, replace) {
   saveScrollPosition();
   // try...catch the pushState call to get around Safari
@@ -336,11 +335,12 @@ function pushState (url, replace) {
   var history = window.history;
   try {
     if (replace) {
-      history.replaceState({ key: _key }, '', url);
+      history.replaceState({ key: _key, index: _index }, '', url);
     } else {
       _key = genKey();
-      history.pushState({ key: _key }, '', url);
-      setRouterHistory(url);
+      var index = _index + 1;
+      history.pushState({ key: _key, index: index }, '', url);
+      setStateIndex(index);
     }
   } catch (e) {
     window.location[replace ? 'replace' : 'assign'](url);
@@ -2463,12 +2463,15 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
     }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', function (e) {
+      console.log(e);
       var current = this$1.current;
       if (!ensureSlash()) {
         return
       }
-      var ref = judgeDirectionWhenClickBrowserBtn(e);
+      var ref = judgeDirection(e);
       var direction = ref.direction;
+      var index = ref.index;
+      setStateIndex(index);
       this$1.transitionTo(getHash(), direction, function (route) {
         if (supportsScroll) {
           handleScroll(this$1.router, route, current, true);
@@ -2572,33 +2575,47 @@ function replaceHash (path) {
   }
 }
 
-function judgeDirectionWhenClickBrowserBtn (e) {
-  var historyListString = sessionStorage.getItem('routerHistoryKeyList');
-  var list = historyListString && JSON.parse(historyListString) || [];
-  var key = e.state && e.state.key;
-  var url = e.currentTarget.location.href;
-  var direction = 'forward';
+function judgeDirection (e) {
+ 
+  // let historyListString = sessionStorage.getItem('routerHistoryKeyList')
+  // let list = historyListString && JSON.parse(historyListString) || []
+  // let key = e.state && e.state.key
+  // let url = e.currentTarget.location.href
+  // let direction = 'forward'
   
-  if(list.length < 1) {
+  // if(list.length < 1) {
+  //   direction = 'refresh'
+  // }
+  // for (let i = list.length - 1; i >= 0; i--) {
+  //   if(decodeURIComponent(list[i].url) === decodeURIComponent(url)) {
+  //     direction = 'back'
+  //     list = list.slice(0, i+1)
+  //     break
+  //   }
+  // }
+  // if(direction === 'forward'){
+  //   list.push({
+  //     key: key,
+  //     url: url
+  //   })
+  // }
+  // sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list))
+
+
+  var state = e.state;
+  var index = state && state.index || 0;
+  var currentIndex = getStateIndex();
+  var direction = '';
+  if(index === currentIndex){
     direction = 'refresh';
+  } else if (index > currentIndex){
+    direction = 'forward';
+  } else if (index < currentIndex){
+    direction = 'back';
   }
-  //直接修改地址栏url路径触发
-  for (var i = list.length - 1; i >= 0; i--) {
-    if(decodeURIComponent(list[i].url) === decodeURIComponent(url)) {
-      direction = 'back';
-      list = list.slice(0, i+1);
-      break
-    }
-  }
-  if(direction === 'forward'){
-    list.push({
-      key: key,
-      url: url
-    });
-  }
-  sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list));
   return {
-    direction: direction
+    direction: direction,
+    index: index
   }
 }
 
@@ -2741,7 +2758,6 @@ VueRouter.prototype.init = function init (app /* Vue component instance */) {
     history.transitionTo(history.getCurrentLocation());
   } else if (history instanceof HashHistory) {
     var setupHashListener = function () {
-      setRouterHistory();
       history.setupListeners();
     };
     history.transitionTo(
@@ -2788,23 +2804,14 @@ VueRouter.prototype.replace = function replace (location, onComplete, onAbort) {
 };
 
 VueRouter.prototype.go = function go (n) {
-  if (n > 0) {
-    this.direction = 'forward';
-  } else if (n < 0) {
-    this.direction = 'back';
-  } else {
-    this.direction = 'refresh';
-  }
   this.history.go(n);
 };
 
 VueRouter.prototype.back = function back () {
-  this.direction = 'back';
   this.go(-1);
 };
 
 VueRouter.prototype.forward = function forward () {
-  this.direction = 'forward';
   this.go(1);
 };
 

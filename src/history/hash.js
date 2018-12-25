@@ -5,7 +5,7 @@ import { History } from './base'
 import { cleanPath } from '../util/path'
 import { getLocation } from './html5'
 import { setupScroll, handleScroll } from '../util/scroll'
-import { pushState, replaceState, supportsPushState } from '../util/push-state'
+import { pushState, replaceState, supportsPushState, getStateIndex, setStateIndex } from '../util/push-state'
 
 export class HashHistory extends History {
   constructor (router: Router, base: ?string, fallback: boolean) {
@@ -33,7 +33,8 @@ export class HashHistory extends History {
       if (!ensureSlash()) {
         return
       }
-      const { direction } = judgeDirectionWhenClickBrowserBtn(e)
+      const { direction, index } = judgeDirection(e)
+      setStateIndex(index)
       this.transitionTo(getHash(), direction, route => {
         if (supportsScroll) {
           handleScroll(this.router, route, current, true)
@@ -129,32 +130,20 @@ function replaceHash (path) {
   }
 }
 
-function judgeDirectionWhenClickBrowserBtn (e:PopStateEvent) {
-  let historyListString = sessionStorage.getItem('routerHistoryKeyList')
-  let list = historyListString && JSON.parse(historyListString) || []
-  let key = e.state && e.state.key
-  let url = e.currentTarget.location.href
-  let direction = 'forward'
-  
-  if(list.length < 1) {
+function judgeDirection (e:PopStateEvent) {
+  const state = e.state
+  const index = state && state.index || 0
+  const currentIndex = getStateIndex()
+  let direction = ''
+  if(index === currentIndex){
     direction = 'refresh'
+  } else if (index > currentIndex){
+    direction = 'forward'
+  } else if (index < currentIndex){
+    direction = 'back'
   }
-  //直接修改地址栏url路径触发
-  for (let i = list.length - 1; i >= 0; i--) {
-    if(decodeURIComponent(list[i].url) === decodeURIComponent(url)) {
-      direction = 'back'
-      list = list.slice(0, i+1)
-      break
-    }
-  }
-  if(direction === 'forward'){
-    list.push({
-      key: key,
-      url: url
-    })
-  }
-  sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list))
   return {
-    direction: direction
+    direction: direction,
+    index: index
   }
 }
