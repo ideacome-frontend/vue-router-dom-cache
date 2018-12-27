@@ -2457,7 +2457,6 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
     }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', function (e) {
-      console.log(e);
       var current = this$1.current;
       if (!ensureSlash()) {
         return
@@ -2570,32 +2569,6 @@ function replaceHash (path) {
 }
 
 function judgeDirection (e) {
- 
-  // let historyListString = sessionStorage.getItem('routerHistoryKeyList')
-  // let list = historyListString && JSON.parse(historyListString) || []
-  // let key = e.state && e.state.key
-  // let url = e.currentTarget.location.href
-  // let direction = 'forward'
-  
-  // if(list.length < 1) {
-  //   direction = 'refresh'
-  // }
-  // for (let i = list.length - 1; i >= 0; i--) {
-  //   if(decodeURIComponent(list[i].url) === decodeURIComponent(url)) {
-  //     direction = 'back'
-  //     list = list.slice(0, i+1)
-  //     break
-  //   }
-  // }
-  // if(direction === 'forward'){
-  //   list.push({
-  //     key: key,
-  //     url: url
-  //   })
-  // }
-  // sessionStorage.setItem('routerHistoryKeyList', JSON.stringify(list))
-
-
   var state = e.state;
   var index = state && state.index || 0;
   var currentIndex = getStateIndex();
