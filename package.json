@@ -1,8 +1,8 @@
 {
-  "name": "vue-router",
-  "version": "1.0.0",
-  "description": "Official router for Vue.js 2",
-  "author": "Evan You",
+  "name": "vue-router-dom-cache",
+  "version": "1.2.0",
+  "description": "基础vue-router开发了新组件router-views，用于SPA切换路由时保存之前页面的dom，效果类似framework7的实现方式，同样也类似于子路由的方式，但是本组件不是嵌套组件，而是并列。详细效果可以查看examples中的router-views demo",
+  "author": "ideacome-f2e",
   "license": "MIT",
   "main": "dist/vue-router.common.js",
   "module": "dist/vue-router.esm.js",
@@ -11,7 +11,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/vuejs/vue-router.git"
+    "url": "https://github.com/ideacome-frontend/vue-router"
   },
   "typings": "types/index.d.ts",
   "files": [

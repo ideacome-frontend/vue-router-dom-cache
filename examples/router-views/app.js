@@ -7,20 +7,20 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 // 2. Define route components
-const Home = { template: '<div>home<input/></div>', created: function () { console.log('home created') }, activated: function () { console.log('home activated') }, deactivated: function () { console.log('home deactivated') } }
-const Foo = { template: '<div>foo<input/></div>', created: function () { console.log('Foo created') }, activated: function () { console.log('Foo activated') }, deactivated: function () { console.log('Foo deactivated') } }
-const Bar = { template: '<div>bar<input/></div>', created: function () { console.log('Bar created') }, activated: function () { console.log('bar activated') }, deactivated: function () { console.log('Bar deactivated') } }
-const Unicode = { template: '<div>unicode</div>', created: function () { console.log('Unicode created') }, activated: function () { console.log('Unicode activated') }, deactivated: function () { console.log('Unicode deactivated') } }
+const Home = { template: '<div>home</div>' }
+const Foo = { template: '<div>foo</div>' }
+const Bar = { template: '<div>bar</div>' }
+const Unicode = { template: '<div>unicode</div>' }
 
 // 3. Create the router
 const router = new VueRouter({
   mode: 'hash',
   base: __dirname,
   routes: [
-    { path: '/', component: Home, keepAlive: true }, // all paths are defined without the hash.
-    { path: '/foo', component: Foo, keepAlive: true },
-    { path: '/bar', component: Bar, keepAlive: true },
-    { path: '/é', component: Unicode, keepAlive: true }
+    { path: '/', component: Home }, // all paths are defined without the hash.
+    { path: '/foo', component: Foo },
+    { path: '/bar', component: Bar },
+    { path: '/é', component: Unicode }
   ]
 })
 
@@ -39,9 +39,7 @@ new Vue({
         <router-link tag="li" to="/bar">/bar</router-link>
         <li><router-link to="/é">/é</router-link></li>
       </ul>
-      <div class="views">
-        <router-views></router-views>
-      </div>
+      <router-views class="view"></router-views>
     </div>
   `
 }).$mount('#app')
