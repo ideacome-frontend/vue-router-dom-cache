@@ -31,7 +31,7 @@ export default class VueRouter {
   beforeHooks: Array<?NavigationGuard>;
   resolveHooks: Array<?NavigationGuard>;
   afterHooks: Array<?AfterNavigationHook>;
-  direction: string; //页面跳转方向
+  direction: string; // 页面跳转方向
 
   constructor (options: RouterOptions = {}) {
     this.app = null
@@ -67,7 +67,7 @@ export default class VueRouter {
           assert(false, `invalid mode: ${mode}`)
         }
     }
-    this.direction = 'refresh' //默认是刷新，即页面刚打开
+    this.direction = 'refresh' // 默认是刷新，即页面刚打开
   }
 
   match (
@@ -88,7 +88,7 @@ export default class VueRouter {
       `not installed. Make sure to call \`Vue.use(VueRouter)\` ` +
       `before creating root instance.`
     )
-    
+
     this.apps.push(app)
 
     // main app already initialized.

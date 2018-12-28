@@ -391,76 +391,77 @@ var Views = {
 
     // render previous view if the tree is inactive and kept-alive
     if (inactive) {
-        currentVnode = h(cache[name], data, children);
-        //   return h(cache[name], data, children)
+      currentVnode = h(cache[name], data, children);
+      //   return h(cache[name], data, children)
     } else {
-        var matched = route.matched[depth];
-        // render empty node if no matched route
-        if (!matched) {
-            cache[name] = null;
-            return h()
-        }
+      var matched = route.matched[depth];
+      // render empty node if no matched route
+      if (!matched) {
+        cache[name] = null;
+        return h()
+      }
 
-        var component = cache[name] = matched.components[name];
+      var component = cache[name] = matched.components[name];
 
-        // attach instance registration hook
-        // this will be called in the instance's injected lifecycle hooks
-        data.registerRouteInstance = function (vm, val) {
-            // val could be undefined for unregistration
-            var current = matched.instances[name];
-            if (
-                (val && current !== vm) ||
+      // attach instance registration hook
+      // this will be called in the instance's injected lifecycle hooks
+      data.registerRouteInstance = function (vm, val) {
+        // val could be undefined for unregistration
+        var current = matched.instances[name];
+        if (
+          (val && current !== vm) ||
                 (!val && current === vm)
-            ) {
-                matched.instances[name] = val;
-            }
+        ) {
+          matched.instances[name] = val;
         }
+      }
 
-        // also register instance in prepatch hook
-        // in case the same component instance is reused across different routes
-        ;(data.hook || (data.hook = {})).prepatch = function (_, vnode) {
-            matched.instances[name] = vnode.componentInstance;
-        };
+      // also register instance in prepatch hook
+      // in case the same component instance is reused across different routes
+      ;(data.hook || (data.hook = {})).prepatch = function (_, vnode) {
+        matched.instances[name] = vnode.componentInstance;
+      };
 
-        // resolve props
-        var propsToPass = data.props = resolveProps$1(route, matched.props && matched.props[name]);
-        if (propsToPass) {
-            // clone to prevent mutation
-            propsToPass = data.props = extend({}, propsToPass);
-            // pass non-declared props as attrs
-            var attrs = data.attrs = data.attrs || {};
-            for (var key in propsToPass) {
-                if (!component.props || !(key in component.props)) {
-                attrs[key] = propsToPass[key];
-                delete propsToPass[key];
-                }
-            }
+      // resolve props
+      var propsToPass = data.props = resolveProps$1(route, matched.props && matched.props[name]);
+      if (propsToPass) {
+        // clone to prevent mutation
+        propsToPass = data.props = extend({}, propsToPass);
+        // pass non-declared props as attrs
+        var attrs = data.attrs = data.attrs || {};
+        for (var key in propsToPass) {
+          if (!component.props || !(key in component.props)) {
+            attrs[key] = propsToPass[key];
+            delete propsToPass[key];
+          }
         }
-        currentVnode = h(component, data, children);
+      }
+      currentVnode = h(component, data, children);
     }
     currentVnode['key'] = genKey();
-   
+
     var direction = router.direction;
-    var transitionName = direction==='back' && vnodeCache.length == 1 ? 'router-fade' : 'router-slid';
+    var transitionName = direction === 'back' && vnodeCache.length === 1 ? 'router-fade' : 'router-slid';
     setVnodeCache(direction, vnodeCache, currentVnode);
     domCached(vnodeCache);
     parent.$root['_vnodeCache'] = vnodeCache;
-    
-    return h('transition-group', { attrs: {tag: 'div', name: transitionName} }, vnodeCache) 
+
+    return h('transition-group', { attrs: { tag: 'div', name: transitionName }}, vnodeCache)
   }
 }
 function matchPage (vnodeCache, tag) {
-    var isCached = false, index = 0;
-    vnodeCache.forEach(function (vnode, i) {
-        if (vnode.tag === tag) {
-            isCached = true;
-            index = i;
-        }
-    });
-    return {
-        isCached: isCached,
-        index: index
+  var isCached = false;
+  var index = 0;
+  vnodeCache.forEach(function (vnode, i) {
+    if (vnode.tag === tag) {
+      isCached = true;
+      index = i;
     }
+  });
+  return {
+    isCached: isCached,
+    index: index
+  }
 }
 function resolveProps$1 (route, config) {
   switch (typeof config) {
@@ -483,45 +484,42 @@ function resolveProps$1 (route, config) {
   }
 }
 function setVnodeCache (direction, vnodeCache, currentVnode) {
-    if(direction==='forward'){
-        vnodeCache.push(currentVnode);
+  if (direction === 'forward') {
+    vnodeCache.push(currentVnode);
+  } else if (direction === 'replace') {
+    vnodeCache.splice(vnodeCache.length - 1, 1, currentVnode);
+  } else if (direction === 'refresh') {
+    vnodeCache.length = 0;
+    vnodeCache.push(currentVnode);
+  } else if (direction === 'back') {
+    if (vnodeCache.length === 1) { // 页面刷新之后回退
+      vnodeCache.length = 0;
+      vnodeCache.push(currentVnode);
+    } else {
+      var ref = matchPage(vnodeCache, currentVnode.tag);
+      var isCached = ref.isCached;
+      var index = ref.index;
+      if (isCached) {
+        vnodeCache.splice(index + 1, vnodeCache.length - index - 1);
+      }
     }
-    else if(direction==='replace'){
-        vnodeCache.splice(vnodeCache.length - 1, 1, currentVnode);
-    }
-    else if(direction==='refresh'){
-        vnodeCache.length = 0;
-        vnodeCache.push(currentVnode);
-    }
-    else if(direction==='back'){
-        if(vnodeCache.length === 1){ //页面刷新之后回退
-            vnodeCache.length = 0;
-            vnodeCache.push(currentVnode);
-        }else{
-            var ref = matchPage(vnodeCache, currentVnode.tag);
-            var isCached = ref.isCached;
-            var index = ref.index;
-            if(isCached) {
-                vnodeCache.splice(index + 1, vnodeCache.length - index - 1);
-            }
-        }
-    }
+  }
 }
-//处理dom的显示隐藏
+// 处理dom的显示隐藏
 function domCached (vnodeCache) {
-    for(var i = 0; i < vnodeCache.length; i++) {
-        if(!vnodeCache[i].elm) { continue; }
-        var classList = vnodeCache[i].elm && vnodeCache[i].elm.classList || [];
-        if(vnodeCache.length > 2) {
-            if(i < vnodeCache.length - 2) {
-                classList.add('cached');
-            } else {
-                classList.remove('cached');
-            }
-        } else if(classList.contains('cached')){
-            classList.remove('cached');
-        }
+  for (var i = 0; i < vnodeCache.length; i++) {
+    if (!vnodeCache[i].elm) { continue }
+    var classList = vnodeCache[i].elm && vnodeCache[i].elm.classList || [];
+    if (vnodeCache.length > 2) {
+      if (i < vnodeCache.length - 2) {
+        classList.add('cached');
+      } else {
+        classList.remove('cached');
+      }
+    } else if (classList.contains('cached')) {
+      classList.remove('cached');
     }
+  }
 }
 
 /*  */
@@ -2037,7 +2035,7 @@ function once (fn) {
 
 /*  */
 
-var History = function History(router, base) {
+var History = function History (router, base) {
 this.router = router;
 this.base = normalizeBase(base);
 // start with a route object that stands for "nowhere"
@@ -2207,7 +2205,7 @@ this.router.afterHooks.forEach(function (hook) {
 });
 };
 
-function normalizeBase(base) {
+function normalizeBase (base) {
   if (!base) {
     if (inBrowser) {
       // respect <base> tag
@@ -2227,7 +2225,7 @@ function normalizeBase(base) {
   return base.replace(/\/$/, '')
 }
 
-function resolveQueue(
+function resolveQueue (
   current,
   next
 ) {
@@ -2245,7 +2243,7 @@ function resolveQueue(
   }
 }
 
-function extractGuards(
+function extractGuards (
   records,
   name,
   bind,
@@ -2262,7 +2260,7 @@ function extractGuards(
   return flatten(reverse ? guards.reverse() : guards)
 }
 
-function extractGuard(
+function extractGuard (
   def,
   key
 ) {
@@ -2273,23 +2271,23 @@ function extractGuard(
   return def.options[key]
 }
 
-function extractLeaveGuards(deactivated) {
+function extractLeaveGuards (deactivated) {
   return extractGuards(deactivated, 'beforeRouteLeave', bindGuard, true)
 }
 
-function extractUpdateHooks(updated) {
+function extractUpdateHooks (updated) {
   return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
 }
 
-function bindGuard(guard, instance) {
+function bindGuard (guard, instance) {
   if (instance) {
-    return function boundRouteGuard() {
+    return function boundRouteGuard () {
       return guard.apply(instance, arguments)
     }
   }
 }
 
-function extractEnterGuards(
+function extractEnterGuards (
   activated,
   cbs,
   isValid
@@ -2299,14 +2297,14 @@ function extractEnterGuards(
   })
 }
 
-function bindEnterGuard(
+function bindEnterGuard (
   guard,
   match,
   key,
   cbs,
   isValid
 ) {
-  return function routeEnterGuard(to, from, next) {
+  return function routeEnterGuard (to, from, next) {
     return guard(to, from, function (cb) {
       next(cb);
       if (typeof cb === 'function') {
@@ -2323,7 +2321,7 @@ function bindEnterGuard(
   }
 }
 
-function poll(
+function poll (
   cb, // somehow flow cannot infer this is a function
   instances,
   key,
@@ -2575,11 +2573,11 @@ function judgeDirection (e) {
   var index = state && state.index || 0;
   var currentIndex = getStateIndex();
   var direction = '';
-  if(index === currentIndex){
+  if (index === currentIndex) {
     direction = 'refresh';
-  } else if (index > currentIndex){
+  } else if (index > currentIndex) {
     direction = 'forward';
-  } else if (index < currentIndex){
+  } else if (index < currentIndex) {
     direction = 'back';
   }
   return {
@@ -2686,7 +2684,7 @@ var VueRouter = function VueRouter (options) {
         assert(false, ("invalid mode: " + mode));
       }
   }
-  this.direction = 'refresh'; //默认是刷新，即页面刚打开
+  this.direction = 'refresh'; // 默认是刷新，即页面刚打开
 };
 
 var prototypeAccessors = { currentRoute: { configurable: true } };
@@ -2711,7 +2709,7 @@ VueRouter.prototype.init = function init (app /* Vue component instance */) {
     "not installed. Make sure to call `Vue.use(VueRouter)` " +
     "before creating root instance."
   );
-    
+
   this.apps.push(app);
 
   // main app already initialized.

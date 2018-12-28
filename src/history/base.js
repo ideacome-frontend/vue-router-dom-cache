@@ -30,7 +30,7 @@ export class History {
 +ensureURL: (push?: boolean) => void;
 +getCurrentLocation: () => string;
 
-constructor(router: Router, base: ?string) {
+constructor (router: Router, base: ?string) {
   this.router = router
   this.base = normalizeBase(base)
   // start with a route object that stands for "nowhere"
@@ -42,11 +42,11 @@ constructor(router: Router, base: ?string) {
   this.errorCbs = []
 }
 
-listen(cb: Function) {
+listen (cb: Function) {
   this.cb = cb
 }
 
-onReady(cb: Function, errorCb: ?Function) {
+onReady (cb: Function, errorCb: ?Function) {
   if (this.ready) {
     cb()
   } else {
@@ -57,11 +57,11 @@ onReady(cb: Function, errorCb: ?Function) {
   }
 }
 
-onError(errorCb: Function) {
+onError (errorCb: Function) {
   this.errorCbs.push(errorCb)
 }
 
-transitionTo(location: RawLocation, direction ?: String, onComplete ?: Function, onAbort ?: Function) {
+transitionTo (location: RawLocation, direction ?: String, onComplete ?: Function, onAbort ?: Function) {
   const route = this.router.match(location, this.current)
   this.confirmTransition(route, () => {
     this.router.direction = direction
@@ -85,7 +85,7 @@ transitionTo(location: RawLocation, direction ?: String, onComplete ?: Function,
   })
 }
 
-confirmTransition(route: Route, onComplete: Function, onAbort ?: Function) {
+confirmTransition (route: Route, onComplete: Function, onAbort ?: Function) {
   const current = this.current
   const abort = err => {
     if (isError(err)) {
@@ -188,7 +188,7 @@ confirmTransition(route: Route, onComplete: Function, onAbort ?: Function) {
   })
 }
 
-updateRoute(route: Route) {
+updateRoute (route: Route) {
   const prev = this.current
   this.current = route
   this.cb && this.cb(route)
@@ -198,7 +198,7 @@ updateRoute(route: Route) {
 }
 }
 
-function normalizeBase(base: ?string): string {
+function normalizeBase (base: ?string): string {
   if (!base) {
     if (inBrowser) {
       // respect <base> tag
@@ -218,7 +218,7 @@ function normalizeBase(base: ?string): string {
   return base.replace(/\/$/, '')
 }
 
-function resolveQueue(
+function resolveQueue (
   current: Array<RouteRecord>,
   next: Array<RouteRecord>
 ): {
@@ -240,7 +240,7 @@ function resolveQueue(
   }
 }
 
-function extractGuards(
+function extractGuards (
   records: Array<RouteRecord>,
   name: string,
   bind: Function,
@@ -257,7 +257,7 @@ function extractGuards(
   return flatten(reverse ? guards.reverse() : guards)
 }
 
-function extractGuard(
+function extractGuard (
   def: Object | Function,
   key: string
 ): NavigationGuard | Array<NavigationGuard> {
@@ -268,23 +268,23 @@ function extractGuard(
   return def.options[key]
 }
 
-function extractLeaveGuards(deactivated: Array<RouteRecord>): Array<?Function> {
+function extractLeaveGuards (deactivated: Array<RouteRecord>): Array<?Function> {
   return extractGuards(deactivated, 'beforeRouteLeave', bindGuard, true)
 }
 
-function extractUpdateHooks(updated: Array<RouteRecord>): Array<?Function> {
+function extractUpdateHooks (updated: Array<RouteRecord>): Array<?Function> {
   return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
 }
 
-function bindGuard(guard: NavigationGuard, instance: ?_Vue): ?NavigationGuard {
+function bindGuard (guard: NavigationGuard, instance: ?_Vue): ?NavigationGuard {
   if (instance) {
-    return function boundRouteGuard() {
+    return function boundRouteGuard () {
       return guard.apply(instance, arguments)
     }
   }
 }
 
-function extractEnterGuards(
+function extractEnterGuards (
   activated: Array<RouteRecord>,
   cbs: Array<Function>,
   isValid: () => boolean
@@ -294,14 +294,14 @@ function extractEnterGuards(
   })
 }
 
-function bindEnterGuard(
+function bindEnterGuard (
   guard: NavigationGuard,
   match: RouteRecord,
   key: string,
   cbs: Array<Function>,
   isValid: () => boolean
 ): NavigationGuard {
-  return function routeEnterGuard(to, from, next) {
+  return function routeEnterGuard (to, from, next) {
     return guard(to, from, cb => {
       next(cb)
       if (typeof cb === 'function') {
@@ -318,7 +318,7 @@ function bindEnterGuard(
   }
 }
 
-function poll(
+function poll (
   cb: any, // somehow flow cannot infer this is a function
   instances: Object,
   key: string,

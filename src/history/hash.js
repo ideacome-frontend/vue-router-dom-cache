@@ -130,16 +130,16 @@ function replaceHash (path) {
   }
 }
 
-function judgeDirection (e:PopStateEvent) {
+function judgeDirection (e: PopStateEvent) {
   const state = e.state
   const index = state && state.index || 0
   const currentIndex = getStateIndex()
   let direction = ''
-  if(index === currentIndex){
+  if (index === currentIndex) {
     direction = 'refresh'
-  } else if (index > currentIndex){
+  } else if (index > currentIndex) {
     direction = 'forward'
-  } else if (index < currentIndex){
+  } else if (index < currentIndex) {
     direction = 'back'
   }
   return {
