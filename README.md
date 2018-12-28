@@ -1,65 +1,75 @@
-# vue-router [![Build Status](https://img.shields.io/circleci/project/github/vuejs/vue-router/dev.svg)](https://circleci.com/gh/vuejs/vue-router)
+# vue-router-dom-cache [![Build Status](https://img.shields.io/circleci/project/github/vuejs/vue-router/dev.svg)](https://circleci.com/gh/vuejs/vue-router)
 
-> This is vue-router 2.0 which works only with Vue 2.0. For the 1.x router see the [1.0 branch](https://github.com/vuejs/vue-router/tree/1.0).
+> 基于vue-router [v3.0.2](https://github.com/vuejs/vue-router/releases/tag/v3.0.2)的二次开发，主要是为了实现路由切换后，保存历史页面的dom，配合页面转场动画效果，实现类似ios原生切换的效果。
+
+> 注意：目前只是针对mode: hash 模式的路由做了处理，其他模式目前并未进行验证，如果有问题或者有需要可以与我们 [联系](https://github.com/ideacome-frontend)，我们会继续完善这个项目。
 
 ### Introduction
 
-`vue-router` is the official router for [Vue.js](http://vuejs.org). It deeply integrates with Vue.js core to make building Single Page Applications with Vue.js a breeze. Features include:
+`vue-router-dom-cache` 是为了能让移动端上使用vue+vue-router的应用可以实现ios上原生应用的效而开发的，在vue-router v3.0.2的基础上，增加了router-views组件，并在router实例上增加了direction属性，用于判断页面跳转方向，direction的值有：
+- `forward`：通过调用this.$router.push(args)或者window.history.go(n) n>0
+- `back`：通过调用this.$router.back()或者window.history.go(n) n<0
+- `refresh`：通过调用this.$router.replace(args)或者window.history.go(0)
+- `replace`：通过调用this.$router.replace()
 
-- Nested route/view mapping
-- Modular, component-based router configuration
-- Route params, query, wildcards
-- View transition effects powered by Vue.js' transition system
-- Fine-grained navigation control
-- Links with automatic active CSS classes
-- HTML5 history mode or hash mode, with auto-fallback in IE9
-- Customizable Scroll Behavior
 
-Get started with the [documentation](http://router.vuejs.org), or play with the [examples](https://github.com/vuejs/vue-router/tree/dev/examples) (see how to run them below).
-
-### Development Setup
+### Usage
 
 ``` bash
 # install deps
-npm install
+npm install vue-router-dom-cache
 
-# build dist files
-npm run build
+# import 
+import VueRouter from 'vue-router-dom-cache'
 
-# serve examples at localhost:8080
-npm run dev
+# use plugins
+Vue.use(VueRouter)
 
-# lint & run all tests
-npm test
+# add global animate css 
+//以下样式为页面切换的效果动画，效果参数可以自己定义
+.router-slid-enter-active{
+    transition:all .3s linear;
+}
 
-# serve docs at localhost:8080
-npm run docs
+.router-slid-leave-active{
+    transition:all .3s linear;
+}
+
+.router-slid-enter, .router-slid-leave-to{
+    transform:translate3d(100%, 0, 0);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s ease;
+}
+
+.fade-enter, .fade-leave-active {
+  opacity: 0;
+}
+
+.cached {
+  display: none
+}
+
+//.view 为demo中演示的非必须样式，可以不加，根据具体的场景自己定义
+.view {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 250px;
+  background: #efeff4;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  width: 100%;
+  height: 100%;
+}
+
 ```
-
-## Questions
-
-For questions and support please use the [Discord chat server](https://chat.vuejs.org) or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
-
-## Issues
-
-Please make sure to read the [Issue Reporting Checklist](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
-
-## Contribution
-
-Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md) before making a pull request.
-
-## Changelog
-
-Details changes for each release are documented in the [release notes](https://github.com/vuejs/vue-router/releases).
-
-## Stay In Touch
-
-- For latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
 
 ## License
 
 [MIT](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2013-present Evan You
+Copyright (c) 2013-present ideacome-f2e
 
 
