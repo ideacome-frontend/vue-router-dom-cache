@@ -7,17 +7,10 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 // 2. Define route components
-<<<<<<< Updated upstream
-const Home = { template: '<div>home<input/></div>',created: function(){console.log('home created');}, activated: function(){console.log('home activated');}, deactivated: function(){console.log('home deactivated');} }
-const Foo = { template: '<div>foo<input/></div>', created: function(){console.log('Foo created');}, activated: function(){console.log('Foo activated');}, deactivated: function(){console.log('Foo deactivated');}}
-const Bar = { template: '<div>bar<input/></div>', created: function(){console.log('Bar created');}, activated: function(){console.log('bar activated');}, deactivated: function(){console.log('Bar deactivated');}}
-const Unicode = { template: '<div>unicode</div>', created: function(){console.log('Unicode created');}, activated: function(){console.log('Unicode activated');}, deactivated: function(){console.log('Unicode deactivated');}}
-=======
 const Home = { template: '<div>home</div>' }
 const Foo = { template: '<div>foo</div>' }
 const Bar = { template: '<div>bar</div>' }
 const Unicode = { template: '<div>unicode</div>' }
->>>>>>> Stashed changes
 
 // 3. Create the router
 const router = new VueRouter({
