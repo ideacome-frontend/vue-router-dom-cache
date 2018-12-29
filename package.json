@@ -11,7 +11,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/ideacome-frontend/vue-router"
+    "url": "https://github.com/ideacome-frontend/vue-router-dom-cache"
   },
   "typings": "types/index.d.ts",
   "files": [
