@@ -6,11 +6,11 @@
 
 ### Introduction
 
-`vue-router-dom-cache` 是为了能让移动端上使用vue+vue-router的应用可以实现ios上原生应用的效而开发的，在vue-router v3.0.2的基础上，增加了router-views组件，并在router实例上增加了direction属性，用于判断页面跳转方向，direction的值有：
-- `forward`：通过调用this.$router.push(args)或者window.history.go(n) n>0
-- `back`：通过调用this.$router.back()或者window.history.go(n) n<0
-- `refresh`：通过调用this.$router.replace(args)或者window.history.go(0)
-- `replace`：通过调用this.$router.replace()
+`vue-router-dom-cache` 是为了能让移动端上使用vue+vue-router的应用可以实现 ios 上原生应用的效而开发的，在vue-router v3.0.2的基础上，增加了router-views组件，并在router实例上增加了direction属性，用于判断页面跳转方向， direction 的值有：
+- `forward`：通过调用 this.$router.push(args) 或者 window.history.go(n) n>0
+- `back`：通过调用 this.$router.back() 或者 window.history.go(n) n<0
+- `refresh`：通过调用 this.$router.replace(args) 或者 window.history.go(0)
+- `replace`：通过调用 this.$router.replace()
 
 
 ### Usage
@@ -54,7 +54,7 @@ Vue.use(VueRouter)
   display: none
 }
 
-//.view 为demo中演示的非必须样式，可以不加，根据具体的场景自己定义
+//.view 为 demo 中演示的非必须样式，可以不加，根据具体的场景自己定义
 .view {
   box-sizing: border-box;
   position: absolute;
