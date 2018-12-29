@@ -1,3 +1,9 @@
+# [1.3.0](2018-12-29)
+
+### Features
+- add support to mode: 'history'
+
+
 # [1.2.0](2018-12-28)
 
 ### Features
