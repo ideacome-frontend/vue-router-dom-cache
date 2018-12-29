@@ -5,7 +5,7 @@ import { History } from './base'
 import { cleanPath } from '../util/path'
 import { getLocation } from './html5'
 import { setupScroll, handleScroll } from '../util/scroll'
-import { pushState, replaceState, supportsPushState, getStateIndex, setStateIndex } from '../util/push-state'
+import { pushState, replaceState, supportsPushState, setStateIndex } from '../util/push-state'
 
 export class HashHistory extends History {
   constructor (router: Router, base: ?string, fallback: boolean) {
@@ -29,11 +29,12 @@ export class HashHistory extends History {
     }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', (e) => {
+      console.log(e);
       const current = this.current
       if (!ensureSlash()) {
         return
       }
-      const { direction, index } = judgeDirection(e)
+      const { direction, index } = this.judgeDirection(e)
       setStateIndex(index)
       this.transitionTo(getHash(), direction, route => {
         if (supportsScroll) {
@@ -127,23 +128,5 @@ function replaceHash (path) {
     replaceState(getUrl(path))
   } else {
     window.location.replace(getUrl(path))
-  }
-}
-
-function judgeDirection (e: PopStateEvent) {
-  const state = e.state
-  const index = state && state.index || 0
-  const currentIndex = getStateIndex()
-  let direction = ''
-  if (index === currentIndex) {
-    direction = 'refresh'
-  } else if (index > currentIndex) {
-    direction = 'forward'
-  } else if (index < currentIndex) {
-    direction = 'back'
-  }
-  return {
-    direction: direction,
-    index: index
   }
 }

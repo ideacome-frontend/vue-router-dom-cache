@@ -5,7 +5,7 @@ import { History } from './base'
 import { cleanPath } from '../util/path'
 import { START } from '../util/route'
 import { setupScroll, handleScroll } from '../util/scroll'
-import { pushState, replaceState, supportsPushState } from '../util/push-state'
+import { pushState, replaceState, supportsPushState, setStateIndex } from '../util/push-state'
 
 export class HTML5History extends History {
   constructor (router: Router, base: ?string) {
@@ -28,8 +28,9 @@ export class HTML5History extends History {
       if (this.current === START && location === initLocation) {
         return
       }
-
-      this.transitionTo(location, route => {
+      const { direction, index } = this.judgeDirection(e)
+      setStateIndex(index)
+      this.transitionTo(location, direction, route => {
         if (supportsScroll) {
           handleScroll(router, route, current, true)
         }
@@ -41,18 +42,18 @@ export class HTML5History extends History {
     window.history.go(n)
   }
 
-  push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+  push (location: RawLocation, direction?: String, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
-    this.transitionTo(location, route => {
+    this.transitionTo(location, direction, route => {
       pushState(cleanPath(this.base + route.fullPath))
       handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)
     }, onAbort)
   }
 
-  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+  replace (location: RawLocation, direction?: String, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
-    this.transitionTo(location, route => {
+    this.transitionTo(location, direction, route => {
       replaceState(cleanPath(this.base + route.fullPath))
       handleScroll(this.router, route, fromRoute, false)
       onComplete && onComplete(route)

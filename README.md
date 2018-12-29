@@ -2,7 +2,7 @@
 
 > 基于vue-router [v3.0.2](https://github.com/vuejs/vue-router/releases/tag/v3.0.2)的二次开发，主要是为了实现路由切换后，保存历史页面的dom，配合页面转场动画效果，实现类似ios原生切换的效果。
 
-> 注意：目前只是针对mode: hash 模式的路由做了处理，其他模式目前并未进行验证，如果有问题或者有需要可以与我们 [联系](https://github.com/ideacome-frontend)，我们会继续完善这个项目。
+> 注意：目前只是针对mode: 'hash'、'history' 模式的路由做了处理，'abstract'模式和不支持history api的浏览器未做处理。如果有问题或者有需要可以与我们 [联系](https://github.com/ideacome-frontend)，我们会继续完善这个项目。
 
 ### Introduction
 
@@ -24,6 +24,9 @@ import VueRouter from 'vue-router-dom-cache'
 
 # use plugins
 Vue.use(VueRouter)
+
+# use router-views in template
+<router-views class="view"/>
 
 # add global animate css 
 //以下样式为页面切换的效果动画，效果参数可以自己定义
@@ -70,6 +73,6 @@ Vue.use(VueRouter)
 
 [MIT](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2013-present ideacome-f2e
+Copyright (c) 2018-present ideacome-f2e
 
 

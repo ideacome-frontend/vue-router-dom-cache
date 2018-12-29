@@ -6,6 +6,8 @@ import { inBrowser } from '../util/dom'
 import { runQueue } from '../util/async'
 import { warn, isError } from '../util/warn'
 import { START, isSameRoute } from '../util/route'
+import { getStateIndex } from '../util/push-state'
+
 import {
   flatten,
   flatMapComponents,
@@ -195,6 +197,24 @@ updateRoute (route: Route) {
   this.router.afterHooks.forEach(hook => {
     hook && hook(route, prev)
   })
+}
+
+judgeDirection (e:PopStateEvent) {
+  const state = e.state
+  const index = state && state.index || 0
+  const currentIndex = getStateIndex()
+  let direction = ''
+  if(index === currentIndex){
+    direction = 'refresh'
+  } else if (index > currentIndex){
+    direction = 'forward'
+  } else if (index < currentIndex){
+    direction = 'back'
+  }
+  return {
+    direction: direction,
+    index: index
+  }
 }
 }
 
