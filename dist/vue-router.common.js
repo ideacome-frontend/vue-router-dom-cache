@@ -1,5 +1,5 @@
 /*!
-  * vue-router v1.0.0
+  * vue-router v1.3.0
   * (c) 2018 Evan You
   * @license MIT
   */
@@ -2205,6 +2205,24 @@ this.router.afterHooks.forEach(function (hook) {
 });
 };
 
+History.prototype.judgeDirection = function judgeDirection (e) {
+var state = e.state;
+var index = state && state.index || 0;
+var currentIndex = getStateIndex();
+var direction = '';
+if(index === currentIndex){
+  direction = 'refresh';
+} else if (index > currentIndex){
+  direction = 'forward';
+} else if (index < currentIndex){
+  direction = 'back';
+}
+return {
+  direction: direction,
+  index: index
+}
+};
+
 function normalizeBase (base) {
   if (!base) {
     if (inBrowser) {
@@ -2364,8 +2382,11 @@ var HTML5History = /*@__PURE__*/(function (History$$1) {
       if (this$1.current === START && location === initLocation) {
         return
       }
-
-      this$1.transitionTo(location, function (route) {
+      var ref = this$1.judgeDirection(e);
+      var direction = ref.direction;
+      var index = ref.index;
+      setStateIndex(index);
+      this$1.transitionTo(location, direction, function (route) {
         if (supportsScroll) {
           handleScroll(router, route, current, true);
         }
@@ -2381,24 +2402,24 @@ var HTML5History = /*@__PURE__*/(function (History$$1) {
     window.history.go(n);
   };
 
-  HTML5History.prototype.push = function push (location, onComplete, onAbort) {
+  HTML5History.prototype.push = function push (location, direction, onComplete, onAbort) {
     var this$1 = this;
 
     var ref = this;
     var fromRoute = ref.current;
-    this.transitionTo(location, function (route) {
+    this.transitionTo(location, direction, function (route) {
       pushState(cleanPath(this$1.base + route.fullPath));
       handleScroll(this$1.router, route, fromRoute, false);
       onComplete && onComplete(route);
     }, onAbort);
   };
 
-  HTML5History.prototype.replace = function replace (location, onComplete, onAbort) {
+  HTML5History.prototype.replace = function replace (location, direction, onComplete, onAbort) {
     var this$1 = this;
 
     var ref = this;
     var fromRoute = ref.current;
-    this.transitionTo(location, function (route) {
+    this.transitionTo(location, direction, function (route) {
       replaceState(cleanPath(this$1.base + route.fullPath));
       handleScroll(this$1.router, route, fromRoute, false);
       onComplete && onComplete(route);
@@ -2457,11 +2478,12 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
     }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', function (e) {
+      console.log(e);
       var current = this$1.current;
       if (!ensureSlash()) {
         return
       }
-      var ref = judgeDirection(e);
+      var ref = this$1.judgeDirection(e);
       var direction = ref.direction;
       var index = ref.index;
       setStateIndex(index);
@@ -2565,24 +2587,6 @@ function replaceHash (path) {
     replaceState(getUrl(path));
   } else {
     window.location.replace(getUrl(path));
-  }
-}
-
-function judgeDirection (e) {
-  var state = e.state;
-  var index = state && state.index || 0;
-  var currentIndex = getStateIndex();
-  var direction = '';
-  if (index === currentIndex) {
-    direction = 'refresh';
-  } else if (index > currentIndex) {
-    direction = 'forward';
-  } else if (index < currentIndex) {
-    direction = 'back';
-  }
-  return {
-    direction: direction,
-    index: index
   }
 }
 
@@ -2722,7 +2726,7 @@ VueRouter.prototype.init = function init (app /* Vue component instance */) {
   var history = this.history;
 
   if (history instanceof HTML5History) {
-    history.transitionTo(history.getCurrentLocation());
+    history.transitionTo(history.getCurrentLocation(), 'refresh');
   } else if (history instanceof HashHistory) {
     var setupHashListener = function () {
       history.setupListeners();
@@ -2846,7 +2850,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '1.0.0';
+VueRouter.version = '1.3.0';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);
