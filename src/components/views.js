@@ -154,7 +154,6 @@ function setVnodeCache (direction, vnodeCache, currentVnode) {
         vnodeCache.push(currentVnode)
       }
     }
-  }
 }
 // 处理dom的显示隐藏
 function domCached (vnodeCache) {
