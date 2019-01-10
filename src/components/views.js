@@ -133,26 +133,25 @@ function resolveProps (route, config) {
   }
 }
 function setVnodeCache (direction, vnodeCache, currentVnode) {
-    if(direction==='forward'){
-        vnodeCache.push(currentVnode)
-    }
-    else if(direction==='replace'){
-        vnodeCache.splice(vnodeCache.length - 1, 1, currentVnode)
-    }
-    else if(direction==='refresh'){
+  if (direction === 'forward') {
+    vnodeCache.push(currentVnode)
+  } else if (direction === 'replace') {
+    vnodeCache.splice(vnodeCache.length - 1, 1, currentVnode)
+  } else if (direction === 'refresh') {
+    vnodeCache.length = 0
+    vnodeCache.push(currentVnode)
+  } else if (direction === 'back') {
+    if (vnodeCache.length === 1) { // 页面刷新之后回退
+      vnodeCache.length = 0
+      vnodeCache.push(currentVnode)
+    } else {
+      const { isCached, index } = matchPage(vnodeCache, currentVnode.tag)
+      if (isCached) {
+        vnodeCache.splice(index + 1, vnodeCache.length - index - 1)
+      } else { //页面刷新=>页面前进=>页面回退（多步返回刷新之前的页面）
         vnodeCache.length = 0
         vnodeCache.push(currentVnode)
-    }
-    else if(direction==='back'){
-        if(vnodeCache.length === 1){ //页面刷新之后回退
-            vnodeCache.length = 0
-            vnodeCache.push(currentVnode)
-        }else{
-            const {isCached, index} = matchPage(vnodeCache, currentVnode.tag)
-            if(isCached) {
-                vnodeCache.splice(index + 1, vnodeCache.length - index - 1)
-            }
-        }
+      }
     }
 }
 //处理dom的显示隐藏
