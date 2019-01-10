@@ -1,6 +1,6 @@
 {
   "name": "vue-router-dom-cache",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "基础vue-router开发了新组件router-views，用于SPA切换路由时保存之前页面的dom，效果类似framework7的实现方式，同样也类似于子路由的方式，但是本组件不是嵌套组件，而是并列。详细效果可以查看examples中的router-views demo",
   "author": "ideacome-f2e",
   "license": "MIT",
