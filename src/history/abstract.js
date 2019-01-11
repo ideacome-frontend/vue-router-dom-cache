@@ -13,16 +13,16 @@ export class AbstractHistory extends History {
     this.index = -1
   }
 
-  push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.transitionTo(location, route => {
+  push (location: RawLocation, direction?: string, onComplete?: Function, onAbort?: Function) {
+    this.transitionTo(location, direction, route => {
       this.stack = this.stack.slice(0, this.index + 1).concat(route)
       this.index++
       onComplete && onComplete(route)
     }, onAbort)
   }
 
-  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.transitionTo(location, route => {
+  replace (location: RawLocation, direction?: string, onComplete?: Function, onAbort?: Function) {
+    this.transitionTo(location, direction, route => {
       this.stack = this.stack.slice(0, this.index).concat(route)
       onComplete && onComplete(route)
     }, onAbort)

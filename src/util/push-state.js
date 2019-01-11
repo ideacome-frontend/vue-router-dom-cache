@@ -31,7 +31,7 @@ export function genKey (): string {
 }
 
 function genIndex (): number {
-  const history = window.history
+  const history = inBrowser && window.history ? window.history : {}
   const index = history.state && history.state['index'] || 0
   return index
 }
@@ -40,7 +40,7 @@ export function getStateKey () {
   return _key
 }
 
-export function setStateKey (key: number) {
+export function setStateKey (key: string) {
   _key = key
 }
 

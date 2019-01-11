@@ -42,7 +42,7 @@ export class HTML5History extends History {
     window.history.go(n)
   }
 
-  push (location: RawLocation, direction?: String, onComplete?: Function, onAbort?: Function) {
+  push (location: RawLocation, direction?: string, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
     this.transitionTo(location, direction, route => {
       pushState(cleanPath(this.base + route.fullPath))
@@ -51,7 +51,7 @@ export class HTML5History extends History {
     }, onAbort)
   }
 
-  replace (location: RawLocation, direction?: String, onComplete?: Function, onAbort?: Function) {
+  replace (location: RawLocation, direction?: string, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
     this.transitionTo(location, direction, route => {
       replaceState(cleanPath(this.base + route.fullPath))
