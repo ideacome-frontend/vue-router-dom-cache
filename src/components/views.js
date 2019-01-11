@@ -149,11 +149,12 @@ function setVnodeCache (direction, vnodeCache, currentVnode) {
       const { isCached, index } = matchPage(vnodeCache, currentVnode.tag)
       if (isCached) {
         vnodeCache.splice(index + 1, vnodeCache.length - index - 1)
-      } else { //页面刷新=>页面前进=>页面回退（多步返回刷新之前的页面）
+      } else { // 页面刷新=>页面前进=>页面回退（多步返回刷新之前的页面）
         vnodeCache.length = 0
         vnodeCache.push(currentVnode)
       }
     }
+  }
 }
 // 处理dom的显示隐藏
 function domCached (vnodeCache) {

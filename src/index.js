@@ -88,7 +88,6 @@ export default class VueRouter {
       `not installed. Make sure to call \`Vue.use(VueRouter)\` ` +
       `before creating root instance.`
     )
-
     this.apps.push(app)
 
     // main app already initialized.

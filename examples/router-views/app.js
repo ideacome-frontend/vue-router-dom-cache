@@ -14,7 +14,7 @@ const Unicode = { template: '<div>unicode</div>' }
 
 // 3. Create the router
 const router = new VueRouter({
-  mode: 'hash', //only support 'hash'（need support history api） and 'history' 
+  mode: 'hash', // only support 'hash'（need support history api）and 'history'.
   base: __dirname,
   routes: [
     { path: '/', component: Home }, // all paths are defined without the hash.
