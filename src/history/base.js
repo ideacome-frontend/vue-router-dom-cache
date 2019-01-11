@@ -65,8 +65,8 @@ export class History {
 
   transitionTo (location: RawLocation, direction?: string, onComplete?: Function, onAbort?: Function) {
     const route = this.router.match(location, this.current)
-    this.confirmTransition(route, (direction) => {
-      this.router.direction = direction
+    this.router.direction = direction || ''
+    this.confirmTransition(route, () => {
       this.updateRoute(route)
       onComplete && onComplete(route)
       this.ensureURL()

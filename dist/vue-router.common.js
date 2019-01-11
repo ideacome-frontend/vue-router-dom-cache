@@ -1,6 +1,6 @@
 /*!
-  * vue-router v1.3.0
-  * (c) 2018 Evan You
+  * vue-router v1.3.1
+  * (c) 2019 Evan You
   * @license MIT
   */
 'use strict';
@@ -303,7 +303,7 @@ function genKey () {
 }
 
 function genIndex () {
-  var history = window.history;
+  var history = inBrowser && window.history ? window.history : {};
   var index = history.state && history.state['index'] || 0;
   return index
 }
@@ -501,6 +501,9 @@ function setVnodeCache (direction, vnodeCache, currentVnode) {
       var index = ref.index;
       if (isCached) {
         vnodeCache.splice(index + 1, vnodeCache.length - index - 1);
+      } else { // 页面刷新=>页面前进=>页面回退（多步返回刷新之前的页面）
+        vnodeCache.length = 0;
+        vnodeCache.push(currentVnode);
       }
     }
   }
@@ -1030,14 +1033,14 @@ function cleanPath (path) {
   return path.replace(/\/\//g, '/')
 }
 
-var isarray = Array.isArray || function (arr) {
+var _isarray_0_0_1_isarray = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
 /**
  * Expose `pathToRegexp`.
  */
-var pathToRegexp_1 = pathToRegexp;
+var _pathToRegexp_1_7_0_pathToRegexp = pathToRegexp;
 var parse_1 = parse;
 var compile_1 = compile;
 var tokensToFunction_1 = tokensToFunction;
@@ -1214,7 +1217,7 @@ function tokensToFunction (tokens) {
         }
       }
 
-      if (isarray(value)) {
+      if (_isarray_0_0_1_isarray(value)) {
         if (!token.repeat) {
           throw new TypeError('Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + '`')
         }
@@ -1365,7 +1368,7 @@ function stringToRegexp (path, keys, options) {
  * @return {!RegExp}
  */
 function tokensToRegExp (tokens, keys, options) {
-  if (!isarray(keys)) {
+  if (!_isarray_0_0_1_isarray(keys)) {
     options = /** @type {!Object} */ (keys || options);
     keys = [];
   }
@@ -1441,7 +1444,7 @@ function tokensToRegExp (tokens, keys, options) {
  * @return {!RegExp}
  */
 function pathToRegexp (path, keys, options) {
-  if (!isarray(keys)) {
+  if (!_isarray_0_0_1_isarray(keys)) {
     options = /** @type {!Object} */ (keys || options);
     keys = [];
   }
@@ -1452,16 +1455,16 @@ function pathToRegexp (path, keys, options) {
     return regexpToRegexp(path, /** @type {!Array} */ (keys))
   }
 
-  if (isarray(path)) {
+  if (_isarray_0_0_1_isarray(path)) {
     return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
   }
 
   return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
 }
-pathToRegexp_1.parse = parse_1;
-pathToRegexp_1.compile = compile_1;
-pathToRegexp_1.tokensToFunction = tokensToFunction_1;
-pathToRegexp_1.tokensToRegExp = tokensToRegExp_1;
+_pathToRegexp_1_7_0_pathToRegexp.parse = parse_1;
+_pathToRegexp_1_7_0_pathToRegexp.compile = compile_1;
+_pathToRegexp_1_7_0_pathToRegexp.tokensToFunction = tokensToFunction_1;
+_pathToRegexp_1_7_0_pathToRegexp.tokensToRegExp = tokensToRegExp_1;
 
 /*  */
 
@@ -1476,7 +1479,7 @@ function fillParams (
   try {
     var filler =
       regexpCompileCache[path] ||
-      (regexpCompileCache[path] = pathToRegexp_1.compile(path));
+      (regexpCompileCache[path] = _pathToRegexp_1_7_0_pathToRegexp.compile(path));
     return filler(params || {}, { pretty: true })
   } catch (e) {
     if (process.env.NODE_ENV !== 'production') {
@@ -1633,7 +1636,7 @@ function addRouteRecord (
 }
 
 function compileRouteRegex (path, pathToRegexpOptions) {
-  var regex = pathToRegexp_1(path, [], pathToRegexpOptions);
+  var regex = _pathToRegexp_1_7_0_pathToRegexp(path, [], pathToRegexpOptions);
   if (process.env.NODE_ENV !== 'production') {
     var keys = Object.create(null);
     regex.keys.forEach(function (key) {
@@ -2036,191 +2039,190 @@ function once (fn) {
 /*  */
 
 var History = function History (router, base) {
-this.router = router;
-this.base = normalizeBase(base);
-// start with a route object that stands for "nowhere"
-this.current = START;
-this.pending = null;
-this.ready = false;
-this.readyCbs = [];
-this.readyErrorCbs = [];
-this.errorCbs = [];
+  this.router = router;
+  this.base = normalizeBase(base);
+  // start with a route object that stands for "nowhere"
+  this.current = START;
+  this.pending = null;
+  this.ready = false;
+  this.readyCbs = [];
+  this.readyErrorCbs = [];
+  this.errorCbs = [];
 };
 
 History.prototype.listen = function listen (cb) {
-this.cb = cb;
+  this.cb = cb;
 };
 
 History.prototype.onReady = function onReady (cb, errorCb) {
-if (this.ready) {
-  cb();
-} else {
-  this.readyCbs.push(cb);
-  if (errorCb) {
-    this.readyErrorCbs.push(errorCb);
+  if (this.ready) {
+    cb();
+  } else {
+    this.readyCbs.push(cb);
+    if (errorCb) {
+      this.readyErrorCbs.push(errorCb);
+    }
   }
-}
 };
 
 History.prototype.onError = function onError (errorCb) {
-this.errorCbs.push(errorCb);
+  this.errorCbs.push(errorCb);
 };
 
-History.prototype.transitionTo = function transitionTo (location, direction , onComplete , onAbort ) {
-  var this$1 = this;
+History.prototype.transitionTo = function transitionTo (location, direction, onComplete, onAbort) {
+    var this$1 = this;
 
-var route = this.router.match(location, this.current);
-this.confirmTransition(route, function () {
-  this$1.router.direction = direction;
-  this$1.updateRoute(route);
-  onComplete && onComplete(route);
-  this$1.ensureURL();
-
-  // fire ready cbs once
-  if (!this$1.ready) {
-    this$1.ready = true;
-    this$1.readyCbs.forEach(function (cb) { cb(route); });
-  }
-}, function (err) {
-  if (onAbort) {
-    onAbort(err);
-  }
-  if (err && !this$1.ready) {
-    this$1.ready = true;
-    this$1.readyErrorCbs.forEach(function (cb) { cb(err); });
-  }
-});
+  var route = this.router.match(location, this.current);
+  this.router.direction = direction || '';
+  this.confirmTransition(route, function () {
+    this$1.updateRoute(route);
+    onComplete && onComplete(route);
+    this$1.ensureURL();
+    // fire ready cbs once
+    if (!this$1.ready) {
+      this$1.ready = true;
+      this$1.readyCbs.forEach(function (cb) { cb(route); });
+    }
+  }, function (err) {
+    if (onAbort) {
+      onAbort(err);
+    }
+    if (err && !this$1.ready) {
+      this$1.ready = true;
+      this$1.readyErrorCbs.forEach(function (cb) { cb(err); });
+    }
+  });
 };
 
 History.prototype.confirmTransition = function confirmTransition (route, onComplete, onAbort ) {
-  var this$1 = this;
+    var this$1 = this;
 
-var current = this.current;
-var abort = function (err) {
-  if (isError(err)) {
-    if (this$1.errorCbs.length) {
-      this$1.errorCbs.forEach(function (cb) { cb(err); });
-    } else {
-      warn(false, 'uncaught error during route navigation:');
-      console.error(err);
+  var current = this.current;
+  var abort = function (err) {
+    if (isError(err)) {
+      if (this$1.errorCbs.length) {
+        this$1.errorCbs.forEach(function (cb) { cb(err); });
+      } else {
+        warn(false, 'uncaught error during route navigation:');
+        console.error(err);
+      }
     }
-  }
-  onAbort && onAbort(err);
-};
-if (
-  isSameRoute(route, current) &&
-  // in the case the route map has been dynamically appended to
-  route.matched.length === current.matched.length
-) {
-  this.ensureURL();
-  return abort()
-}
-// 比较跳转前的路由记录和将要跳转的路由记录
-// 以便可以确切的知道 哪些组件需要更新 哪些不需要更新
-var ref = resolveQueue(this.current.matched, route.matched);
-  var updated = ref.updated;
-  var deactivated = ref.deactivated;
-  var activated = ref.activated;
-
-// 待执行的各种钩子更新队列
-var queue = [].concat(
-  // in-component leave guards（提取组件的 beforeRouteLeave 钩子）
-  extractLeaveGuards(deactivated),
-  // global before hooks（全局的 beforeEach 钩子）
-  this.router.beforeHooks,
-  // in-component update hooks（提取组件的 beforeRouteUpdate 钩子）
-  extractUpdateHooks(updated),
-  // in-config enter guards(组件的 beforeRouteEnter 钩子)
-  activated.map(function (m) { return m.beforeEnter; }),
-  // async components
-  resolveAsyncComponents(activated)
-);
-
-// 保存下一个路由
-this.pending = route;
-var iterator = function (hook, next) {
-  if (this$1.pending !== route) {
+    onAbort && onAbort(err);
+  };
+  if (
+    isSameRoute(route, current) &&
+    // in the case the route map has been dynamically appended to
+    route.matched.length === current.matched.length
+  ) {
+    this.ensureURL();
     return abort()
   }
-  try {
-    // 导航钩子
-    hook(route, current, function (to) {
-      if (to === false || isError(to)) {
-        // next(false) -> abort navigation, ensure current URL
-        this$1.ensureURL(true);
-        abort(to);
-      } else if (
-        typeof to === 'string' ||
-        (typeof to === 'object' && (
-          typeof to.path === 'string' ||
-          typeof to.name === 'string'
-        ))
-      ) {
-        // next('/') or next({ path: '/' }) -> redirect
-        abort();
-        if (typeof to === 'object' && to.replace) {
-          this$1.replace(to);
-        } else {
-          this$1.push(to);
-        }
-      } else {
-        // confirm transition and pass on the value
-        next(to);
-      }
-    });
-  } catch (e) {
-    abort(e);
-  }
-};
+  // 比较跳转前的路由记录和将要跳转的路由记录
+  // 以便可以确切的知道 哪些组件需要更新 哪些不需要更新
+  var ref = resolveQueue(this.current.matched, route.matched);
+    var updated = ref.updated;
+    var deactivated = ref.deactivated;
+    var activated = ref.activated;
 
-// 执行各种钩子队列
-runQueue(queue, iterator, function () {
-  var postEnterCbs = [];
-  var isValid = function () { return this$1.current === route; };
-  // wait until async components are resolved before
-  // extracting in-component enter guards(等待异步组件 OK 时，执行组件内的钩子)
-  var enterGuards = extractEnterGuards(activated, postEnterCbs, isValid);
-  var queue = enterGuards.concat(this$1.router.resolveHooks);
-  runQueue(queue, iterator, function () {
+  // 待执行的各种钩子更新队列
+  var queue = [].concat(
+    // in-component leave guards（提取组件的 beforeRouteLeave 钩子）
+    extractLeaveGuards(deactivated),
+    // global before hooks（全局的 beforeEach 钩子）
+    this.router.beforeHooks,
+    // in-component update hooks（提取组件的 beforeRouteUpdate 钩子）
+    extractUpdateHooks(updated),
+    // in-config enter guards(组件的 beforeRouteEnter 钩子)
+    activated.map(function (m) { return m.beforeEnter; }),
+    // async components
+    resolveAsyncComponents(activated)
+  );
+
+  // 保存下一个路由
+  this.pending = route;
+  var iterator = function (hook, next) {
     if (this$1.pending !== route) {
       return abort()
     }
-    this$1.pending = null;
-    onComplete(route);
-    if (this$1.router.app) {
-      this$1.router.app.$nextTick(function () {
-        postEnterCbs.forEach(function (cb) { cb(); });
+    try {
+      // 导航钩子
+      hook(route, current, function (to) {
+        if (to === false || isError(to)) {
+          // next(false) -> abort navigation, ensure current URL
+          this$1.ensureURL(true);
+          abort(to);
+        } else if (
+          typeof to === 'string' ||
+          (typeof to === 'object' && (
+            typeof to.path === 'string' ||
+            typeof to.name === 'string'
+          ))
+        ) {
+          // next('/') or next({ path: '/' }) -> redirect
+          abort();
+          if (typeof to === 'object' && to.replace) {
+            this$1.replace(to);
+          } else {
+            this$1.push(to);
+          }
+        } else {
+          // confirm transition and pass on the value
+          next(to);
+        }
       });
+    } catch (e) {
+      abort(e);
     }
+  };
+
+  // 执行各种钩子队列
+  runQueue(queue, iterator, function () {
+    var postEnterCbs = [];
+    var isValid = function () { return this$1.current === route; };
+    // wait until async components are resolved before
+    // extracting in-component enter guards(等待异步组件 OK 时，执行组件内的钩子)
+    var enterGuards = extractEnterGuards(activated, postEnterCbs, isValid);
+    var queue = enterGuards.concat(this$1.router.resolveHooks);
+    runQueue(queue, iterator, function () {
+      if (this$1.pending !== route) {
+        return abort()
+      }
+      this$1.pending = null;
+      onComplete(route);
+      if (this$1.router.app) {
+        this$1.router.app.$nextTick(function () {
+          postEnterCbs.forEach(function (cb) { cb(); });
+        });
+      }
+    });
   });
-});
 };
 
 History.prototype.updateRoute = function updateRoute (route) {
-var prev = this.current;
-this.current = route;
-this.cb && this.cb(route);
-this.router.afterHooks.forEach(function (hook) {
-  hook && hook(route, prev);
-});
+  var prev = this.current;
+  this.current = route;
+  this.cb && this.cb(route);
+  this.router.afterHooks.forEach(function (hook) {
+    hook && hook(route, prev);
+  });
 };
 
 History.prototype.judgeDirection = function judgeDirection (e) {
-var state = e.state;
-var index = state && state.index || 0;
-var currentIndex = getStateIndex();
-var direction = '';
-if(index === currentIndex){
-  direction = 'refresh';
-} else if (index > currentIndex){
-  direction = 'forward';
-} else if (index < currentIndex){
-  direction = 'back';
-}
-return {
-  direction: direction,
-  index: index
-}
+  var state = e.state;
+  var index = state && state.index || 0;
+  var currentIndex = getStateIndex();
+  var direction = '';
+  if (index === currentIndex) {
+    direction = 'refresh';
+  } else if (index > currentIndex) {
+    direction = 'forward';
+  } else if (index < currentIndex) {
+    direction = 'back';
+  }
+  return {
+    direction: direction,
+    index: index
+  }
 };
 
 function normalizeBase (base) {
@@ -2478,7 +2480,6 @@ var HashHistory = /*@__PURE__*/(function (History$$1) {
     }
 
     window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', function (e) {
-      console.log(e);
       var current = this$1.current;
       if (!ensureSlash()) {
         return
@@ -2603,20 +2604,20 @@ var AbstractHistory = /*@__PURE__*/(function (History$$1) {
   AbstractHistory.prototype = Object.create( History$$1 && History$$1.prototype );
   AbstractHistory.prototype.constructor = AbstractHistory;
 
-  AbstractHistory.prototype.push = function push (location, onComplete, onAbort) {
+  AbstractHistory.prototype.push = function push (location, direction, onComplete, onAbort) {
     var this$1 = this;
 
-    this.transitionTo(location, function (route) {
+    this.transitionTo(location, direction, function (route) {
       this$1.stack = this$1.stack.slice(0, this$1.index + 1).concat(route);
       this$1.index++;
       onComplete && onComplete(route);
     }, onAbort);
   };
 
-  AbstractHistory.prototype.replace = function replace (location, onComplete, onAbort) {
+  AbstractHistory.prototype.replace = function replace (location, direction, onComplete, onAbort) {
     var this$1 = this;
 
-    this.transitionTo(location, function (route) {
+    this.transitionTo(location, direction, function (route) {
       this$1.stack = this$1.stack.slice(0, this$1.index).concat(route);
       onComplete && onComplete(route);
     }, onAbort);
@@ -2713,7 +2714,6 @@ VueRouter.prototype.init = function init (app /* Vue component instance */) {
     "not installed. Make sure to call `Vue.use(VueRouter)` " +
     "before creating root instance."
   );
-
   this.apps.push(app);
 
   // main app already initialized.
@@ -2830,7 +2830,7 @@ VueRouter.prototype.resolve = function resolve (
 VueRouter.prototype.addRoutes = function addRoutes (routes) {
   this.matcher.addRoutes(routes);
   if (this.history.current !== START) {
-    this.history.transitionTo(this.history.getCurrentLocation());
+    this.history.transitionTo(this.history.getCurrentLocation(), 'forward');
   }
 };
 
@@ -2850,7 +2850,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '1.3.0';
+VueRouter.version = '1.3.1';
 
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter);

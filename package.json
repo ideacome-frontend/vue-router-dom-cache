@@ -44,10 +44,13 @@
     "commit-msg": "node scripts/verifyCommitMsg.js"
   },
   "lint-staged": {
-    "*.{js,vue}": [
-      "eslint --fix",
-      "git add"
-    ]
+    "linters": {
+      "*.{js,vue}": [ 
+        "eslint --fix",
+        "git add"
+      ]
+    },
+    "ignore": ["**/dist/*.js"]
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
