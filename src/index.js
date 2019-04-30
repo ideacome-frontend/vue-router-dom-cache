@@ -144,8 +144,8 @@ export default class VueRouter {
     this.history.push(location, 'forward', onComplete, onAbort)
   }
 
-  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.history.replace(location, 'replace', onComplete, onAbort)
+  replace (location: RawLocation, direction?: string = 'replace', onComplete?: Function, onAbort?: Function) {
+    this.history.replace(location, direction, onComplete, onAbort)
   }
 
   go (n: number) {
