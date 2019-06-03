@@ -9,6 +9,10 @@ export default {
     name: {
       type: String,
       default: 'default'
+    },
+    transitionName: {
+      type: String,
+      default: 'router-slid'
     }
   },
   render (_, { props, children, parent, data }) {
@@ -91,7 +95,7 @@ export default {
     currentVnode['key'] = genKey()
 
     const direction = router.direction
-    const transitionName = direction === 'back' && vnodeCache.length === 1 ? 'router-fade' : 'router-slid'
+    const transitionName = direction === 'back' && vnodeCache.length === 1 ? 'router-fade' : props.transitionName
     setVnodeCache(direction, vnodeCache, currentVnode)
     domCached(vnodeCache)
     parent.$root['_vnodeCache'] = vnodeCache
